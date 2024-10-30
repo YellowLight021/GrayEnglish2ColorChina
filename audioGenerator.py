@@ -9,8 +9,8 @@ class AudioGenerator:
                         file_path=savePath,
                         speaker_wav=ref_wav,
                         language=language)
-    def generateWave(self,text,language="zh"):
-        wav=self.tts.tts(text=text,speaker_wav="data/ref.wav",language=language)
+    def generateWave(self,text,ref="data/ref.wav",language="zh"):
+        wav=self.tts.tts(text=text,speaker_wav=ref,language=language)
         return wav
 
 class AudioGeneratorBark:

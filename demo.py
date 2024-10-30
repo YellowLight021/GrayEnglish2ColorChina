@@ -9,9 +9,9 @@ import librosa
 import numpy as np
 import argparse
 
-def translate_and_tts(audio_generator,translator,text):
+def translate_and_tts(audio_generator,translator,text,ref):
     new_text=translator.from_en_to_ch(text)
-    new_sound=audio_generator.generateWave(new_text[0])
+    new_sound=audio_generator.generateWave(new_text[0],ref=ref)
     return new_sound
 def merge_sound_video(temp_video,temp_china_sount,output_video):
     input_video_path = temp_video  # 视频文件路径
@@ -44,8 +44,8 @@ def main(input_video,output_video,refSound,addColor):
     temp_video='temp/color.mp4'
     temp_sound="temp/sound.wav"
     temp_china_sount="temp/temp_sound.wav"
-    input_video="data/magray.mp4"
-    output_video="data/macolorchina.mp4"
+    input_video=input_video
+    output_video=output_video
     if addColor:
         print("start colorization......")
         colorizer = ColorizationPipeline("ddcolor/ddcolor.xml")
@@ -67,7 +67,7 @@ def main(input_video,output_video,refSound,addColor):
         start_sample = int(text_clip["start"] * samplerate)  # 转换为样本点
         end_sample = int(text_clip["end"]  * samplerate)  # 转换为样本点
         text=text_clip['text']
-        processed_segment=translate_and_tts(audio_generator,translator,text)
+        processed_segment=translate_and_tts(audio_generator,translator,text,refSound)
         stretch_factor =(end_sample-start_sample)/len(processed_segment) # 时间拉伸因子
         processed_segment = librosa.effects.time_stretch(np.array(processed_segment), rate=1/stretch_factor)
         # 将处理后的音频融回原音频
@@ -91,9 +91,9 @@ def main(input_video,output_video,refSound,addColor):
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="transfer a english video to chinese video.")
-    parser.add_argument("--input", type=str, help="input video")
-    parser.add_argument("--output", type=str, help="input video")
-    parser.add_argument("--refSound", type=str, help="reference Sound")
+    parser.add_argument("--input", type=str,default="data/magray.mp4", help="input video")
+    parser.add_argument("--output", type=str,default="data/macolorchina.mp4", help="input video")
+    parser.add_argument("--refSound", type=str,default="data/ref.wav", help="reference Sound")
     parser.add_argument("--addColor", type=bool,default=False, help="if add color")
 
     args = parser.parse_args()
