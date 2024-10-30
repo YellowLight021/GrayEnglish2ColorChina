@@ -1,0 +1,12 @@
+# 忽略模型参数文件
+*.bin
+*.pth
+
+# 忽略 Python 缓存文件
+__pycache__/
+*.pyc
+
+# 忽略操作系统生成的文件
+.DS_Store
+Thumbs.db
+.idea/
