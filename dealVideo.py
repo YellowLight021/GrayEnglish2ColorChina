@@ -5,7 +5,7 @@ def convert_to_grayscale(input_path, output_path):
     # 打开输入视频
     # 加载视频
     clip = VideoFileClip(input_path)
-    clip = clip.subclip(0, 32)
+    clip = clip.subclip(0, 20)
     # 转换每一帧为黑白
     gray_clip = clip.fl_image(lambda frame: frame.mean(axis=2).astype('uint8'))  # 转换为灰度
 
@@ -26,7 +26,7 @@ def clip_and_get_sound():
     audio_clip.write_audiofile(r"data/ma.wav")
 
 if __name__=="__main__":
-    #convert_to_grayscale("data/mayun.mp4","data/magray.mp4")
+    convert_to_grayscale("data/mayun.mp4","data/magray.mp4")
     clip_and_get_sound()
 
 

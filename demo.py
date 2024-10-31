@@ -1,3 +1,5 @@
+from turtledemo.penrose import start
+
 from audioGenerator import AudioGenerator
 from audioRecognize import AudioRecongize
 from translateClass import Translation
@@ -11,6 +13,7 @@ import argparse
 
 def translate_and_tts(audio_generator,translator,text,ref):
     new_text=translator.from_en_to_ch(text)
+    print("new text:{}".format(new_text))
     new_sound=audio_generator.generateWave(new_text[0],ref=ref)
     return new_sound
 def merge_sound_video(temp_video,temp_china_sount,output_video):
@@ -65,13 +68,21 @@ def main(input_video,output_video,refSound,addColor):
 
     for text_clip in tqdm(recognize_result):
         start_sample = int(text_clip["start"] * samplerate)  # 转换为样本点
-        end_sample = int(text_clip["end"]  * samplerate)  # 转换为样本点
+        end_sample = min(int(text_clip["end"]  * samplerate),len(processed_audio))  # 转换为样本点
         text=text_clip['text']
+        desired_length=(end_sample-start_sample)
+        print(text_clip)
         processed_segment=translate_and_tts(audio_generator,translator,text,refSound)
-        stretch_factor =(end_sample-start_sample)/len(processed_segment) # 时间拉伸因子
-        processed_segment = librosa.effects.time_stretch(np.array(processed_segment), rate=1/stretch_factor)
+        processed_segment = librosa.resample(np.array(processed_segment), orig_sr=24000, target_sr=16000)
+        adjusted_length=len(processed_segment)
+        if desired_length>adjusted_length:
+            padding = desired_length - adjusted_length
+            processed_segment = np.pad(processed_segment, (0, padding), mode='constant')
+        else:
+            processed_segment = processed_segment[:desired_length]
+
         # 将处理后的音频融回原音频
-        processed_audio[start_sample:start_sample + len(processed_segment)] = processed_segment
+        processed_audio[start_sample:end_sample] = processed_segment
 
     adjusted_length = len(processed_audio)
     desired_length = int(desired_duration * samplerate)
